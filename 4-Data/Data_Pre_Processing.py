@@ -3,7 +3,6 @@ import numpy as np
 
 def fill_null_values(df):
     """
-    Fill null values in the dataframe with appropriate strategies:
     - Numeric columns: Fill with median
     - Categorical columns: Fill with mode
     - Boolean columns: Fill with False

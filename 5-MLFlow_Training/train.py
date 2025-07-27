@@ -8,26 +8,21 @@ import joblib
 from dotenv import load_dotenv
 import os
 
-# Load the environment variables from the .env file
+# Loading the environment variables from the .env file
 load_dotenv()
 
-# Now use the environment variables
+# Using environment variables
 username = os.getenv("DAGSHUB_USERNAME")
 token = os.getenv("DAGSHUB_TOKEN")
 
 print("Username:", username)
 print("Token:", token)
 
-# ✅ Connect to DAGsHub
+# Connect to DAGsHub
 init(repo_owner='sarveshchezhian2003', repo_name='Fraud-Detection-System', mlflow=True)
-
-
-# # ✅ Enable MLflow autolog (optional)
-# mlflow.autolog()
 
 df = pd.read_csv("../4-Data/dataset.csv")
 
-# Example feature engineering
 df["type_encoded"] = df["type"].astype("category").cat.codes
 df["delta_orig"] = df["newbalanceOrig"] - df["oldbalanceOrg"]
 df["delta_dest"] = df["newbalanceDest"] - df["oldbalanceDest"]
@@ -49,7 +44,7 @@ with mlflow.start_run():
     acc = accuracy_score(y_test, preds)
     auc = roc_auc_score(y_test, preds)
 
-    # Explicit logging (redundant if autolog is on)
+    # Explicit logging
     mlflow.log_param("n_estimators", 100)
     mlflow.log_param("max_depth", 6)
     mlflow.log_metric("accuracy", acc)
@@ -58,5 +53,5 @@ with mlflow.start_run():
     # Save model locally
     joblib.dump(model, "model.joblib")
 
-    # Log model file to MLflow (optional)
+    # Log model file to MLflow
     mlflow.log_artifact("model.joblib")
