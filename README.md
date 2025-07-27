@@ -4,11 +4,3 @@ Libraries:
     dvc
     dagshub
     mlflow==2.22.1
-
-
-NOTE: 
-- In Airflow, follow this order
-    1. Pull DVC data
-    2. Execute python train.py
-def pull_dvc_data():
-    subprocess.run(["dvc", "pull"], check=True)

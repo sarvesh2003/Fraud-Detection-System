@@ -1,3 +1,4 @@
 **/worker/
 dvcEnv/
 .env
+AirFlow_Integration_Failed/
