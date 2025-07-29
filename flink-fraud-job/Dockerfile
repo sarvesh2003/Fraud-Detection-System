@@ -1,4 +1,3 @@
-# Use official Flink image
 FROM apache/flink:1.18-scala_2.12-java11
 
 # Install Python 3 and pip

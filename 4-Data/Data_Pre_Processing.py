@@ -64,7 +64,15 @@ def main():
         raise
 
 if __name__ == "__main__":
-    main()
+    # main()
     df = pd.read_csv('dataset.csv')
-    has_nulls = df.isnull().values.any()
-    print("Contains null values:", has_nulls)
+    df = df.head(3)
+    df["type_encoded"] = df["type"].astype("category").cat.codes
+    df["delta_orig"] = df["newbalanceOrig"] - df["oldbalanceOrg"]
+    df["delta_dest"] = df["newbalanceDest"] - df["oldbalanceDest"]
+    features = ["amount", "type_encoded", "delta_orig", "delta_dest"]
+    X = df[features]
+    print(X)
+
+    # has_nulls = df.isnull().values.any()
+    # print("Contains null values:", has_nulls)

@@ -7,7 +7,7 @@ def main():
     env = StreamExecutionEnvironment.get_execution_environment()
 
     kafka_props = {
-        'bootstrap.servers': 'host.docker.internal:29092',  # Update here
+        'bootstrap.servers': 'host.docker.internal:29092',
         'group.id': 'fraud-detector-group',
         'auto.offset.reset': 'earliest'
     }
@@ -23,14 +23,33 @@ def main():
     def process(transaction_json):
         try:
             txn = json.loads(transaction_json)
+
+            # Extract fields
+            txn_id = txn.get("transaction_id")
+            user = txn.get("user_id")
             amount = float(txn.get("amount", 0))
-            if amount > 10:
-                return f"[FRAUD ALERT] Transaction {txn['transaction_id']} by user {txn['user_id']} for ₹{amount} from {txn['ip_address']} ({txn.get('city', '')}, {txn.get('country', '')})"
+            tx_type = txn.get("type", "")
+            ip = txn.get("ip_address", "")
+            city = txn.get("city", "")
+            country = txn.get("country", "")
+
+            # Apply fraud detection rules
+            alerts = []
+
+            if amount > 100000:
+                alerts.append("===== Large amount > ₹1L =====")
+            if tx_type in ["TRANSFER", "CASH_OUT"] and amount > 10000:
+                alerts.append(f"***** Suspicious {tx_type} > ₹10K *****")
+
+            if alerts:
+                return f"[FRAUD ALERT] {txn_id} | User: {user} | Amount: ₹{amount} | IP: {ip} ({city}, {country}) | Flags: {', '.join(alerts)}"
             return None
         except Exception as e:
             return f"[ERROR] Invalid input: {str(e)}"
 
-    stream.map(process, output_type=Types.STRING()).filter(lambda x: x is not None).print()
+    stream.map(process, output_type=Types.STRING()) \
+          .filter(lambda x: x is not None) \
+          .print()
 
     env.execute("FraudDetectionJob")
 
