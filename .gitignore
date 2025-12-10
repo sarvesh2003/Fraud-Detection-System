@@ -4,3 +4,8 @@ dvcEnv/
 AirFlow_Integration_Failed/
 AirFlow_Integration_Failed_2/
 6-Airflow_Integration/logs
+**/__pycache__/
+*.tar.gz
+*.mmdb
+*.dvc
+*.jar

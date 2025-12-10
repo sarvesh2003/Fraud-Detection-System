@@ -16,7 +16,6 @@ import (
 var topicName = "raw_transactions"
 var userIDs []string
 
-// Transaction struct aligned with your ML features
 type Transaction struct {
 	TransactionID   string    `json:"transaction_id"`
 	UserID          string    `json:"user_id"`

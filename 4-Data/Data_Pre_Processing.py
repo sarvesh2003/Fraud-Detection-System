@@ -2,14 +2,7 @@ import pandas as pd
 import numpy as np
 
 def fill_null_values(df):
-    """
-    - Numeric columns: Fill with median
-    - Categorical columns: Fill with mode
-    - Boolean columns: Fill with False
-    """
-    print("\n=== NULL VALUE IMPUTATION ===\n")
-    
-    # Track original null counts
+    print("\n=== NULL VALUE IMPUTATION ===\n")    
     null_counts = df.isnull().sum()
     if null_counts.sum() == 0:
         print("No null values found in the dataset.")
@@ -42,8 +35,7 @@ def fill_null_values(df):
     return df
 
 def main():
-    # File paths
-    input_file = 'dataset.csv'  # Update with your file path
+    input_file = 'dataset.csv'
     output_file = 'filled_transactions.csv'
     
     try:
@@ -64,7 +56,6 @@ def main():
         raise
 
 if __name__ == "__main__":
-    # main()
     df = pd.read_csv('dataset.csv')
     df = df.head(3)
     df["type_encoded"] = df["type"].astype("category").cat.codes
@@ -73,6 +64,3 @@ if __name__ == "__main__":
     features = ["amount", "type_encoded", "delta_orig", "delta_dest"]
     X = df[features]
     print(X)
-
-    # has_nulls = df.isnull().values.any()
-    # print("Contains null values:", has_nulls)

@@ -9,26 +9,15 @@ import joblib
 from dotenv import load_dotenv
 import os
 
-# Loading the environment variables from the .env file
 load_dotenv()
-
-# Using environment variables
 username = os.getenv("DAGSHUB_USERNAME")
 token = os.getenv("DAGSHUB_TOKEN")
 print("Username:", username)
 print("Token:", token)
 
-# Authenticate with DAGsHub to avoid browser popup
 dagshub.auth.add_app_token(token=token)
 
-# Connect to DAGsHub (without token parameter)
 init(repo_owner='sarveshchezhian2003', repo_name='Fraud-Detection-System', mlflow=True)
-
-# Alternative method if the above doesn't work:
-# import mlflow
-# mlflow.set_tracking_uri('https://dagshub.com/sarveshchezhian2003/Fraud-Detection-System.mlflow')
-# os.environ['MLFLOW_TRACKING_USERNAME'] = username
-# os.environ['MLFLOW_TRACKING_PASSWORD'] = token
 
 # Load and preprocess data
 df = pd.read_csv("/mnt/project/4-Data/dataset.csv")
@@ -49,7 +38,7 @@ print("Train Test Split Done")
 with mlflow.start_run():
     print("Starting to fit the classifier")
     
-    # Model parameters (fix the mismatch in your logging)
+    # Model parameters
     n_estimators = 2
     max_depth = 2
     
@@ -63,7 +52,7 @@ with mlflow.start_run():
     acc = accuracy_score(y_test, preds)
     auc = roc_auc_score(y_test, preds)
     
-    # Log parameters (match actual model parameters)
+    # Log parameters
     mlflow.log_param("n_estimators", n_estimators)
     mlflow.log_param("max_depth", max_depth)
     

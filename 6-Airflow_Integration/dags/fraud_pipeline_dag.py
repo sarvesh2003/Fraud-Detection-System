@@ -21,7 +21,6 @@ def pull_data():
     
     # Check if target directory exists
     import os
-    # target_dir = "/opt/airflow/4-Data"
     target_dir = "/mnt/project/4-Data"
     if not os.path.exists(target_dir):
         logger.error(f"Target directory does not exist: {target_dir}")
@@ -36,7 +35,7 @@ def pull_data():
             check=True, 
             capture_output=True, 
             text=True,
-            timeout=300  # 5 minute timeout
+            timeout=300
         )
         logger.info(f"DVC pull successful: {result.stdout}")
         if result.stderr:
@@ -58,13 +57,11 @@ def run_training():
     
     # Check if target directory exists
     import os
-    # target_dir = "/opt/airflow/5-MLFlow_Training"
     target_dir = "/mnt/project/5-MLFlow_Training"
     if not os.path.exists(target_dir):
         logger.error(f"Target directory does not exist: {target_dir}")
         raise FileNotFoundError(f"Directory {target_dir} not found")
     
-    # Check if train.py exists
     train_script = os.path.join(target_dir, "train.py")
     if not os.path.exists(train_script):
         logger.error(f"Training script not found: {train_script}")
@@ -79,7 +76,7 @@ def run_training():
             check=True, 
             capture_output=True, 
             text=True,
-            timeout=1800  # 30 minute timeout
+            timeout=1800
         )
         logger.info(f"Training successful: {result.stdout}")
         if result.stderr:
@@ -113,7 +110,7 @@ def push_data():
             check=True,
             capture_output=True,
             text=True,
-            timeout=300  # 5 minutes
+            timeout=300
         )
         logger.info(f"DVC push successful: {result.stdout}")
         if result.stderr:
@@ -132,7 +129,7 @@ def push_data():
 @dag(
     dag_id="fraud_detection_pipeline",
     schedule="*/5 * * * *",
-    start_date=datetime(2024, 1, 1),  # Use datetime instead of days_ago
+    start_date=datetime(2024, 1, 1),
     catchup=False,
     tags=["fraud", "mlflow", "dvc"],
     doc_md="""
@@ -146,8 +143,8 @@ def push_data():
         'owner': 'data-team',
         'retries': 1,
         'retry_delay': timedelta(minutes=5),
-        'execution_timeout': timedelta(minutes=60),  # Kill task if it runs longer than 60 minutes
-        'sla': timedelta(hours=2),  # SLA for the tasks
+        'execution_timeout': timedelta(minutes=60),
+        'sla': timedelta(hours=2),
     }
 )
 def fraud_pipeline():
@@ -156,8 +153,6 @@ def fraud_pipeline():
     training_task = run_training()
     pushing_data = push_data()
     
-    # Set task dependencies
     data_task >> training_task >> pushing_data
 
-# Instantiate the DAG
 fraud_dag = fraud_pipeline()

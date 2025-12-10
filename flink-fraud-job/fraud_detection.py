@@ -1,9 +1,79 @@
+import os
+import time
+import json
+import joblib
+import urllib.request
+import pandas as pd  # ✅ Added for DataFrame input
 from pyflink.common import SimpleStringSchema, Types
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.datastream.connectors import FlinkKafkaConsumer
-import json
+
+MODEL_PATH = os.getenv("MODEL_PATH", "/tmp/model.joblib")
+DAGSHUB_URL = os.getenv(
+    "MODEL_URL",
+    "https://dagshub.com/sarveshchezhian2003/Fraud-Detection-System/raw/main/5-MLFlow_Training/model.joblib"
+)
+
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print(f"[INFO] Downloading model from DagsHub: {DAGSHUB_URL}")
+        try:
+            urllib.request.urlretrieve(DAGSHUB_URL, MODEL_PATH)
+            print("[INFO] Model downloaded successfully.")
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model: {e}")
+    else:
+        print(f"[INFO] Model already exists at {MODEL_PATH}. Skipping download.")
+
+def load_model():
+    print(f"[INFO] Loading model from: {MODEL_PATH}")
+    return joblib.load(MODEL_PATH)
+
+class FraudDetector:
+    def __init__(self):
+        self.model = load_model()
+        self.last_loaded = os.path.getmtime(MODEL_PATH)
+
+    def maybe_reload_model(self):
+        current_mtime = os.path.getmtime(MODEL_PATH)
+        if current_mtime != self.last_loaded:
+            print("[INFO] Detected updated model. Reloading...")
+            self.model = load_model()
+            self.last_loaded = current_mtime
+
+    def predict(self, transaction_json):
+        try:
+            self.maybe_reload_model()
+
+            txn = json.loads(transaction_json)
+            txn_id = txn.get("transaction_id")
+            user = txn.get("user_id")
+            amount = float(txn.get("amount", 0))
+            tx_type = txn.get("type", "")
+            ip = txn.get("ip_address", "")
+            city = txn.get("city", "")
+            country = txn.get("country", "")
+
+            features = pd.DataFrame([{
+                "amount": amount,
+                "type_encoded": 1.0 if tx_type == "TRANSFER" else 0.0,
+                "delta_orig": float(txn.get("delta_orig", 0)),
+                "delta_dest": float(txn.get("delta_dest", 0))
+            }])
+
+            prediction = self.model.predict(features)[0]
+            is_fraud = bool(prediction)
+
+            if is_fraud:
+                return f"[ML FRAUD ALERT] {txn_id} | User: {user} | ₹{amount} | IP: {ip} ({city}, {country})"
+            return None
+
+        except Exception as e:
+            return f"[ERROR] {str(e)}"
 
 def main():
+    download_model()
+
     env = StreamExecutionEnvironment.get_execution_environment()
 
     kafka_props = {
@@ -20,32 +90,10 @@ def main():
 
     stream = env.add_source(consumer)
 
-    def process(transaction_json):
-        try:
-            txn = json.loads(transaction_json)
+    detector = FraudDetector()
 
-            # Extract fields
-            txn_id = txn.get("transaction_id")
-            user = txn.get("user_id")
-            amount = float(txn.get("amount", 0))
-            tx_type = txn.get("type", "")
-            ip = txn.get("ip_address", "")
-            city = txn.get("city", "")
-            country = txn.get("country", "")
-
-            # Apply fraud detection rules
-            alerts = []
-
-            if amount > 100000:
-                alerts.append("===== Large amount > ₹1L =====")
-            if tx_type in ["TRANSFER", "CASH_OUT"] and amount > 10000:
-                alerts.append(f"***** Suspicious {tx_type} > ₹10K *****")
-
-            if alerts:
-                return f"[FRAUD ALERT] {txn_id} | User: {user} | Amount: ₹{amount} | IP: {ip} ({city}, {country}) | Flags: {', '.join(alerts)}"
-            return None
-        except Exception as e:
-            return f"[ERROR] Invalid input: {str(e)}"
+    def process(txn_json):
+        return detector.predict(txn_json)
 
     stream.map(process, output_type=Types.STRING()) \
           .filter(lambda x: x is not None) \

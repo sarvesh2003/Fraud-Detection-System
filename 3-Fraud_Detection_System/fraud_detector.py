@@ -14,14 +14,12 @@ print("Listening for transactions on 'enriched_transactions'...")
 
 try:
     while True:
-        msg = consumer.poll(1.0)  # timeout in seconds
+        msg = consumer.poll(1.0)
         if msg is None:
             continue
         if msg.error():
             print("Error:", msg.error())
             continue
-
-        # Parse transaction
         try:
             txn = json.loads(msg.value().decode('utf-8'))
             amount = float(txn.get("amount", 0))

@@ -1,7 +1,6 @@
 # Dockerfile
 FROM apache/airflow:3.0.3
 
-# Upgrade pip and install project dependencies
 RUN pip install --upgrade pip && pip install \
     pandas \
     scikit-learn \
@@ -11,5 +10,4 @@ RUN pip install --upgrade pip && pip install \
     python-dotenv \
     dvc
 
-# Optional: check installations
 RUN python -c "import pandas, sklearn, joblib, mlflow, dagshub, dotenv, dvc"

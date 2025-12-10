@@ -1,14 +1,22 @@
-• Architected a low-latency, event-driven fraud detection pipeline using Apache Kafka and Apache Flink to process and flag suspicious financial transactions in real time.
+# Real-Time Financial Fraud Detection using Kafka, Flink & MLOps Tools
+- A production-grade MLOps platform that detects financial fraud in real-time. This system integrates a Golang high-throughput ingestion layer with an Apache Flink ML inference engine, orchestrated by Airflow for continuous model training and deployment.
+- The system implements a Lambda Architecture variant where real-time streams are processed against dynamically updated Machine Learning models.
+## Key Features
+### Real-Time ML Inference using PyFlink
+- **Scikit-Learn Integration:** The Flink job deserializes the transaction stream and passes features (amount, delta_orig, delta_dest) into a pre-trained Random Forest Classifier.
+- **Dynamic Model Reloading:** The system implements a Hot-Swap mechanism. The Flink worker monitors the model file timestamp. If the Airflow pipeline pushes a new model, Flink reloads it into memory without stopping the stream.
+- **Automated Model Fetching:** On startup, the system automatically downloads the latest production model from the DAGsHub remote registry.
+### High-Performance Ingestion using Golang
+- **Concurrent Simulation:** A Go-based simulator generates realistic financial traffic patterns.
+- **Geo-Enrichment:** A Go microservice enriches transactions with geolocation (City/Country) using in-memory GeoIP lookups and a Redis Look-Aside cache for low latency.
+### Automated MLOps using Airflow & DVC
+- **Continuous Training (CT):** An Airflow DAG runs on a schedule to pull the latest dataset via DVC, retrain the model, and push the new artifact to the registry.
+- **Experiment Tracking:** All training runs, metrics (AUC/Accuracy), and parameters are logged to MLflow for auditability.
 
-• Developed a custom Go-based Kafka producer to simulate realistic financial transactions and publish them to Kafka topics for downstream processing.
-
-• Designed and deployed a microservices-based enrichment agent in Go, integrating GeoIP lookups via MaxMind DB and Redis caching to enrich and standardize transaction data with high throughput.
-
-• Implemented a rule-based fraud detection engine as the baseline system, with an extensible design supporting ML-driven anomaly detection models.
-
-• Applied MLOps best practices—integrating MLflow for experiment tracking and model management, DVC and DagsHub for dataset/model versioning, and Apache Airflow for pipeline orchestration and automation.
-
-Libraries:
-    dvc
-    dagshub
-    mlflow==2.22.1
+## Technology Stack
+- **Ingestion:** Golang, Sarama (Kafka Client).
+- **Streaming:** Apache Kafka, Zookeeper.
+- **Processing:** Apache Flink (PyFlink), Pandas.
+- **Machine Learning:** Scikit-Learn, Joblib.
+- **MLOps:** Apache Airflow, MLflow, DVC, DAGsHub.
+- **Infrastructure:** Docker, Docker Compose, Redis.

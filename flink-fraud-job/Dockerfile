@@ -4,7 +4,7 @@ FROM apache/flink:1.18-scala_2.12-java11
 RUN apt-get update && \
     apt-get install -y python3 python3-pip && \
     pip3 install --upgrade pip && \
-    ln -s /usr/bin/python3 /usr/bin/python  # 👈 fix: make `python` point to `python3`
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Install PyFlink and any other dependencies
 COPY requirements.txt /opt/requirements.txt

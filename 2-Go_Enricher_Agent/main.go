@@ -15,7 +15,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// Transaction includes enriched fields + original payload from producer
 type Transaction struct {
 	TransactionID   string    `json:"transaction_id"`
 	UserID          string    `json:"user_id"`
@@ -30,13 +29,10 @@ type Transaction struct {
 	DeltaDest       float64   `json:"delta_dest"`
 	IPAddress       string    `json:"ip_address"`
 	Timestamp       time.Time `json:"timestamp"`
-
-	// Enriched fields
 	Country string `json:"country,omitempty"`
 	City    string `json:"city,omitempty"`
 }
 
-// ConsumerGroupHandler processes raw transactions, enriches, and re-publishes
 type ConsumerGroupHandler struct {
 	producer sarama.SyncProducer
 	db       *geoip2.Reader
@@ -70,7 +66,7 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 					txn.City = loc["city"]
 				}
 			} else {
-				// Redis miss → use GeoIP lookup
+				// Redis miss -> use GeoIP lookup
 				if record, err := h.db.City(ip); err == nil {
 					txn.Country = record.Country.Names["en"]
 					txn.City = record.City.Names["en"]
