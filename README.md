@@ -20,3 +20,8 @@
 - **Machine Learning:** Scikit-Learn, Joblib.
 - **MLOps:** Apache Airflow, MLflow, DVC, DAGsHub.
 - **Infrastructure:** Docker, Docker Compose, Redis.
+
+## Activity Diagram
+![alt text](https://github.com/sarvesh2003/Fraud-Detection-System/blob/main/activity_diagram.png)
+
+
