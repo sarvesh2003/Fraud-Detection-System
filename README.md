@@ -1,3 +1,9 @@
+# NOTE:
+
+This is Version 1 of the Real-Time Financial Fraud Detection System.
+
+The latest and actively maintained Version 2 is available here: [NEW_VERSION](https://github.com/sarvesh2003/Real_Time_Financial_Fraud_Detection_System_v2)
+
 # Real-Time Financial Fraud Detection using Kafka, Flink & MLOps Tools
 - A production-grade MLOps platform that detects financial fraud in real-time. This system integrates a Golang high-throughput ingestion layer with an Apache Flink ML inference engine, orchestrated by Airflow for continuous model training and deployment.
 - The system implements a Lambda Architecture variant where real-time streams are processed against dynamically updated Machine Learning models.
